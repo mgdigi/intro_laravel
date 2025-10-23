@@ -15,52 +15,22 @@ services:
       - APP_KEY=${APP_KEY}
       - APP_DEBUG=false
       - APP_URL=http://localhost:8000
-      - DB_CONNECTION=mysql
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_DATABASE=ges_compte
-      - DB_USERNAME=laravel
-      - DB_PASSWORD=laravel_password
+      - DB_CONNECTION=pgsql
+      - DB_HOST=dpg-d3t28em3jp1c73a67vcg-a
+      - DB_PORT=5432
+      - DB_DATABASE=postgrs_laravel
+      - DB_USERNAME=postgrs_laravel_user
+      - DB_PASSWORD=XETg5QKcVQrtQULxpzwYWqpmXzKLyICw
       - CACHE_DRIVER=file
       - QUEUE_CONNECTION=sync
       - SESSION_DRIVER=file
       - LOG_CHANNEL=stack
-    depends_on:
-      - db
+  
     volumes:
       - ./storage:/var/www/html/storage
     networks:
       - ges-compte-network
 
-  db:
-    image: postgres:15
-    container_name: ges-compte-db
-    restart: unless-stopped
-    environment:
-      - POSTGRES_DB=ges_compte
-      - POSTGRES_USER=laravel
-      - POSTGRES_PASSWORD=laravel_password
-    ports:
-      - "5432:5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
-      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - ges-compte-network
-
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: ges-compte-pgadmin
-    restart: unless-stopped
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@ges-compte.com
-      - PGADMIN_DEFAULT_PASSWORD=admin123
-    ports:
-      - "8080:80"
-    depends_on:
-      - db
-    networks:
-      - ges-compte-network
 
 volumes:
   db_data:
