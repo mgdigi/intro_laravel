@@ -1,0 +1,801 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Ges_Compte Laravel",
+        "description": "API pour la gestion des comptes bancaires",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/v1/comptes": {
+            "get": {
+                "tags": [
+                    "Comptes"
+                ],
+                "summary": "Lister tous les comptes",
+                "description": "Récupère une liste paginée des comptes avec possibilité de filtrage et tri",
+                "operationId": "3aa4bfe153daa4673a76cb7a021921b1",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Numéro de la page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Nombre d'éléments par page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Type de compte (epargne ou cheque)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "epargne",
+                                "cheque"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "statut",
+                        "in": "query",
+                        "description": "Statut du compte",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "actif",
+                                "bloque",
+                                "ferme"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Recherche par titulaire ou numéro de compte",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Champ de tri",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "dateCreation",
+                                "solde",
+                                "titulaire"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "description": "Ordre de tri",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des comptes récupérée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "comptes": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/CompteResource"
+                                                    }
+                                                },
+                                                "pagination": {
+                                                    "$ref": "#/components/schemas/PaginationMeta"
+                                                },
+                                                "links": {
+                                                    "$ref": "#/components/schemas/PaginationLinks"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Paramètres de requête invalides",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Comptes"
+                ],
+                "summary": "Créer un nouveau compte",
+                "description": "Crée un nouveau compte bancaire avec un client associé",
+                "operationId": "a45c56d49c7e6dc38a691e72e6aa9e0a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "type",
+                                    "solde",
+                                    "devise",
+                                    "user"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "epargne",
+                                            "cheque"
+                                        ],
+                                        "example": "epargne"
+                                    },
+                                    "solde": {
+                                        "type": "number",
+                                        "minimum": 10000,
+                                        "example": 50000
+                                    },
+                                    "devise": {
+                                        "type": "string",
+                                        "enum": [
+                                            "FCFA",
+                                            "EUR",
+                                            "USD"
+                                        ],
+                                        "example": "FCFA"
+                                    },
+                                    "user": {
+                                        "required": [
+                                            "nom",
+                                            "prenom",
+                                            "password",
+                                            "email",
+                                            "telephone",
+                                            "nci",
+                                            "adresse"
+                                        ],
+                                        "properties": {
+                                            "nom": {
+                                                "type": "string",
+                                                "maxLength": 255,
+                                                "example": "Dupont"
+                                            },
+                                            "prenom": {
+                                                "type": "string",
+                                                "maxLength": 255,
+                                                "example": "Jean"
+                                            },
+                                            "password": {
+                                                "type": "string",
+                                                "minLength": 6,
+                                                "example": "password123"
+                                            },
+                                            "email": {
+                                                "type": "string",
+                                                "format": "email",
+                                                "example": "jean.dupont@email.com"
+                                            },
+                                            "telephone": {
+                                                "type": "string",
+                                                "example": "+221771234567"
+                                            },
+                                            "nci": {
+                                                "type": "string",
+                                                "example": "1234567890123456"
+                                            },
+                                            "adresse": {
+                                                "type": "string",
+                                                "example": "Dakar, Sénégal"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Compte créé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Compte créé avec succès"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "numeroCompte": {
+                                                    "type": "string"
+                                                },
+                                                "titulaire": {
+                                                    "type": "string"
+                                                },
+                                                "type": {
+                                                    "type": "string"
+                                                },
+                                                "solde": {
+                                                    "type": "number"
+                                                },
+                                                "devise": {
+                                                    "type": "string"
+                                                },
+                                                "dateCreation": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "statut": {
+                                                    "type": "string"
+                                                },
+                                                "metadata": {
+                                                    "properties": {
+                                                        "derniereModification": {
+                                                            "type": "string",
+                                                            "format": "date-time"
+                                                        },
+                                                        "version": {
+                                                            "type": "integer"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Données de validation invalides",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/comptes/{compte}": {
+            "get": {
+                "tags": [
+                    "Comptes"
+                ],
+                "summary": "Afficher un compte spécifique",
+                "description": "Récupère les détails d'un compte bancaire spécifique",
+                "operationId": "acb7ab8e6d93dab2d01f1ba8eb6e0e18",
+                "parameters": [
+                    {
+                        "name": "compte",
+                        "in": "path",
+                        "description": "ID du compte",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails du compte récupérés avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/CompteResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Compte non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Compte non trouvé"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Comptes"
+                ],
+                "summary": "Mettre à jour un compte",
+                "description": "Met à jour les informations d'un compte bancaire existant",
+                "operationId": "5293c1a3f2cd81cb7294db8426c64ac7",
+                "parameters": [
+                    {
+                        "name": "compte",
+                        "in": "path",
+                        "description": "ID du compte",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "titulaire": {
+                                        "type": "string",
+                                        "maxLength": 150,
+                                        "example": "Jean Dupont"
+                                    },
+                                    "informationsUser": {
+                                        "properties": {
+                                            "nom": {
+                                                "type": "string",
+                                                "maxLength": 50,
+                                                "example": "Dupont"
+                                            },
+                                            "prenom": {
+                                                "type": "string",
+                                                "maxLength": 70,
+                                                "example": "Jean"
+                                            },
+                                            "email": {
+                                                "type": "string",
+                                                "format": "email",
+                                                "example": "jean.dupont@email.com"
+                                            },
+                                            "telephone": {
+                                                "type": "string",
+                                                "example": "+221771234567"
+                                            },
+                                            "nci": {
+                                                "type": "string",
+                                                "example": "1234567890123456"
+                                            },
+                                            "adresse": {
+                                                "type": "string",
+                                                "example": "Dakar, Sénégal"
+                                            },
+                                            "password": {
+                                                "type": "string",
+                                                "minLength": 6,
+                                                "example": "newpassword123"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Compte mis à jour avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Compte mis à jour avec succès"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "numeroCompte": {
+                                                    "type": "string"
+                                                },
+                                                "titulaire": {
+                                                    "type": "string"
+                                                },
+                                                "type": {
+                                                    "type": "string"
+                                                },
+                                                "solde": {
+                                                    "type": "number"
+                                                },
+                                                "devise": {
+                                                    "type": "string"
+                                                },
+                                                "dateCreation": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "statut": {
+                                                    "type": "string"
+                                                },
+                                                "metadata": {
+                                                    "properties": {
+                                                        "derniereModification": {
+                                                            "type": "string",
+                                                            "format": "date-time"
+                                                        },
+                                                        "version": {
+                                                            "type": "integer"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Compte non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Compte non trouvé"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Données de validation invalides",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "PaginationMeta": {
+                "title": "PaginationMeta",
+                "description": "Métadonnées de pagination",
+                "properties": {
+                    "currentPage": {
+                        "description": "Page actuelle",
+                        "type": "integer"
+                    },
+                    "totalPages": {
+                        "description": "Nombre total de pages",
+                        "type": "integer"
+                    },
+                    "totalItems": {
+                        "description": "Nombre total d'éléments",
+                        "type": "integer"
+                    },
+                    "itemsPerPage": {
+                        "description": "Éléments par page",
+                        "type": "integer"
+                    },
+                    "hasNext": {
+                        "description": "Page suivante disponible",
+                        "type": "boolean"
+                    },
+                    "hasPrevious": {
+                        "description": "Page précédente disponible",
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "PaginationLinks": {
+                "title": "PaginationLinks",
+                "description": "Liens de pagination",
+                "properties": {
+                    "self": {
+                        "description": "Lien vers la page actuelle",
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "next": {
+                        "description": "Lien vers la page suivante",
+                        "type": "string",
+                        "format": "uri",
+                        "nullable": true
+                    },
+                    "first": {
+                        "description": "Lien vers la première page",
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "last": {
+                        "description": "Lien vers la dernière page",
+                        "type": "string",
+                        "format": "uri"
+                    }
+                },
+                "type": "object"
+            },
+            "CompteResource": {
+                "title": "CompteResource",
+                "description": "Ressource représentant un compte bancaire avec ses métadonnées",
+                "properties": {
+                    "id": {
+                        "description": "ID unique du compte",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "numeroCompte": {
+                        "description": "Numéro unique du compte",
+                        "type": "string"
+                    },
+                    "titulaire": {
+                        "description": "Nom du titulaire du compte",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "Type de compte",
+                        "type": "string",
+                        "enum": [
+                            "epargne",
+                            "cheque"
+                        ]
+                    },
+                    "solde": {
+                        "description": "Solde du compte",
+                        "type": "number",
+                        "format": "decimal"
+                    },
+                    "devise": {
+                        "description": "Devise du compte",
+                        "type": "string"
+                    },
+                    "dateCreation": {
+                        "description": "Date de création du compte",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "statut": {
+                        "description": "Statut du compte",
+                        "type": "string",
+                        "enum": [
+                            "actif",
+                            "bloque",
+                            "ferme"
+                        ]
+                    },
+                    "motifBlocage": {
+                        "description": "Motif de blocage si applicable",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "metadata": {
+                        "description": "Métadonnées du compte",
+                        "properties": {
+                            "derniereModification": {
+                                "description": "Date de dernière modification",
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "version": {
+                                "description": "Version du compte",
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "Compte": {
+                "title": "Compte",
+                "description": "Modèle représentant un compte bancaire",
+                "properties": {
+                    "id": {
+                        "description": "ID unique du compte",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "numero_compte": {
+                        "description": "Numéro unique du compte",
+                        "type": "string"
+                    },
+                    "user_id": {
+                        "description": "ID de l'utilisateur propriétaire",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "titulaire": {
+                        "description": "Nom du titulaire du compte",
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "type": {
+                        "description": "Type de compte",
+                        "type": "string",
+                        "enum": [
+                            "epargne",
+                            "cheque"
+                        ]
+                    },
+                    "solde": {
+                        "description": "Solde du compte",
+                        "type": "number",
+                        "format": "decimal"
+                    },
+                    "devise": {
+                        "description": "Devise du compte",
+                        "type": "string",
+                        "maxLength": 10
+                    },
+                    "statut": {
+                        "description": "Statut du compte",
+                        "type": "string",
+                        "enum": [
+                            "actif",
+                            "bloque",
+                            "ferme"
+                        ]
+                    },
+                    "derniere_modification": {
+                        "description": "Date de dernière modification",
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "version": {
+                        "description": "Version du compte",
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "description": "Date de création",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Date de dernière mise à jour",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Comptes",
+            "description": "Gestion des comptes bancaires"
+        }
+    ]
+}
